@@ -132,7 +132,7 @@ class MexicanTrain:
             player_turn += 1
             player_turn %= len(player_list)
             current_player = self.players[player_turn]["player"]
-
+            print(current_player.name + "'s turn")
             # let the player play on their own train until they can't play any more
             while True:
                 # if the player doesn't want to (or can't) play any more, let them end their turn
@@ -161,7 +161,44 @@ class MexicanTrain:
                 print("Domino added")
                 print("Your new train: ", self.players[player_turn]["train"])
 
+        while 0 not in [len(p["player"].hand) for p in self.players]:
+            # the next player gets to play, and reset the count at the last player
+            player_turn += 1
+            player_turn %= len(player_list)
+            current_player = self.players[player_turn]["player"]
+            print(current_player.name + "'s turn")
+            print("Your train: ", self.players[player_turn]["train"])
 
+            # let the player play on their own train a maximum of once
+            while True:
+                # if the player doesn't want to (or can't) play any more, let them end their turn
+                ans = input("Would you like to play a domino? (y/N)")
+                while ans not in ["y", "N"]:
+                    ans = input("Please choose y or N")
+
+                if ans == "N":
+                    self.draw_domino(current_player)
+                    break
+
+                # let the player choose a domino to play
+                attempted_play = current_player.play_domino()
+                if self.players[player_turn]["train"] is None:
+                    if attempted_play.match(self.center_domino):
+                        if (attempted_play.num2 == self.center_domino.num1):
+                            attempted_play.flip()
+                        self.players[player_turn]["train"] = DominoTrain(attempted_play)
+                    else:
+                        print("That domino can't play. Try again.")
+                        continue
+                else:
+                    if not self.players[player_turn]["train"].add_domino(attempted_play):
+                        print("That domino can't play. Try again.")
+                        continue
+
+                print("Domino added")
+                break
+
+            print("Your new train: ", self.players[player_turn]["train"])
 
 
         # print the hand of each player
