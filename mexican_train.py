@@ -162,21 +162,6 @@ class MexicanTrain:
                 print("Your new train: ", self.players[player_turn]["train"])
 
 
-        # starting simple with a single train
-        train = DominoTrain(self.center_domino)
-        while 0 not in [len(player["player"].hand) for player in self.players]:
-            player_turn += 1
-            player_turn %= len(player_list)
-            current_player = self.players[player_turn]["player"]
-            attempted_play = current_player.play_domino()
-
-            if train.can_add_domino(attempted_play):
-                train.add_domino(attempted_play)
-                print("Domino Added")
-                print("Current train:", train)
-            else:
-                current_player.add_domino(attempted_play)
-                print("Domino couldn't be added")
 
 
         # print the hand of each player
