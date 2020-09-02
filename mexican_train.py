@@ -12,6 +12,7 @@ class MexicanTrain:
         self.center_domino = None
         self.is_marked = False
         self.players = []
+        self.mexican_train = None
 
         # create all the dominoes
         for i in range(0, 13):
@@ -147,16 +148,15 @@ class MexicanTrain:
                 attempted_play = current_player.play_domino()
                 if self.players[player_turn]["train"] is None:
                     if attempted_play.match(self.center_domino):
-                        if(attempted_play.num2 == self.center_domino.num1):
+                        if attempted_play.num2 == self.center_domino.num1:
                             attempted_play.flip()
                         self.players[player_turn]["train"] = DominoTrain(attempted_play)
                     else:
                         print("That domino can't play. Try again.")
                         continue
-                else:
-                    if not self.players[player_turn]["train"].add_domino(attempted_play):
-                        print("That domino can't play. Try again.")
-                        continue
+                elif not self.players[player_turn]["train"].add_domino(attempted_play):
+                    print("That domino can't play. Try again.")
+                    continue
 
                 print("Domino added")
                 print("Your new train: ", self.players[player_turn]["train"])
@@ -168,6 +168,10 @@ class MexicanTrain:
             current_player = self.players[player_turn]["player"]
             print(current_player.name + "'s turn")
             print("Your train: ", self.players[player_turn]["train"])
+            if self.mexican_train is None:
+                print("The Mexican Train hasn't started yet")
+            else:
+                print("The Mexican Train is: ", self.mexican_train)
 
             # let the player play on their own train a maximum of once
             while True:
@@ -176,27 +180,53 @@ class MexicanTrain:
                 while ans not in ["y", "N"]:
                     ans = input("Please choose y or N")
 
+                # if the player doesn't play, draw and end turn
                 if ans == "N":
                     self.draw_domino(current_player)
                     break
 
-                # let the player choose a domino to play
-                attempted_play = current_player.play_domino()
-                if self.players[player_turn]["train"] is None:
-                    if attempted_play.match(self.center_domino):
-                        if (attempted_play.num2 == self.center_domino.num1):
-                            attempted_play.flip()
-                        self.players[player_turn]["train"] = DominoTrain(attempted_play)
-                    else:
-                        print("That domino can't play. Try again.")
-                        continue
-                else:
-                    if not self.players[player_turn]["train"].add_domino(attempted_play):
+                ans = input("Would you like to play on your own train (o) or the Mexican Train (M)? (o/M)")
+                while ans not in ["o", "M"]:
+                    ans = input("Please choose o or M")
+
+                # if the player wants to play on the Mexican Train
+                if ans == "M":
+                    # let the player choose a domino to play
+                    attempted_play = current_player.play_domino()
+                    if self.mexican_train is None:
+                        if attempted_play.match(self.center_domino):
+                            if attempted_play.num2 == self.center_domino.num1:
+                                attempted_play.flip()
+                            self.mexican_train = DominoTrain(attempted_play)
+                        else:
+                            print("That domino can't play. Try again.")
+                            continue
+                    elif not self.mexican_train.add_domino(attempted_play):
                         print("That domino can't play. Try again.")
                         continue
 
-                print("Domino added")
-                break
+                    print("Domino added")
+                    print("Your new train: ", self.players[player_turn]["train"])
+
+                # else the player wants to play on their own train
+                else:
+                    # let the player choose a domino to play
+                    attempted_play = current_player.play_domino()
+                    if self.players[player_turn]["train"] is None:
+                        if attempted_play.match(self.center_domino):
+                            if attempted_play.num2 == self.center_domino.num1:
+                                attempted_play.flip()
+                            self.players[player_turn]["train"] = DominoTrain(attempted_play)
+                        else:
+                            print("That domino can't play. Try again.")
+                            continue
+                    else:
+                        if not self.players[player_turn]["train"].add_domino(attempted_play):
+                            print("That domino can't play. Try again.")
+                            continue
+
+                    print("Domino added")
+                    break
 
             print("Your new train: ", self.players[player_turn]["train"])
 
