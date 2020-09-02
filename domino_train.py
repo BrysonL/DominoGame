@@ -9,9 +9,18 @@ class DominoTrain:
             raise TypeError
 
         self.train = [first_domino]
+        self.is_marked = False
 
     def __str__(self):
         return ' '.join(str(d) for d in self.train)
+
+    # mark the train so others can play on it
+    def mark(self):
+        self.is_marked = True
+
+    # unmark the train so others can't play on it
+    def unmark(self):
+        self.is_marked = False
 
     # to add a domino to a train, it must match the last domino in the train
     def add_domino(self, domino):

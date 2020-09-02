@@ -10,7 +10,6 @@ class MexicanTrain:
     def __init__(self):
         self.dominoes = []
         self.center_domino = None
-        self.is_marked = False
         self.players = []
         self.mexican_train = None
 
@@ -185,7 +184,13 @@ class MexicanTrain:
                 # if the player doesn't play, draw and end turn
                 if ans == "N":
                     self.draw_domino(current_player)
+                    # if the player can't play on their train, mark it
+                    if self.players[player_turn]["train"] is not None:
+                        self.players[player_turn]["train"].mark()
                     break
+
+                if True in [p["train"] is not None and p["train"].is_marked for p in self.players]:
+                    print("Someone is marked")
 
                 ans = input("Would you like to play on your own train (o) or the Mexican Train (M)? (o/M)")
                 while ans not in ["o", "M"]:
@@ -234,6 +239,8 @@ class MexicanTrain:
 
                     print("Domino added")
                     print("Your new train: ", self.players[player_turn]["train"])
+                    # if the player's train is marked and they play, unmark it
+                    self.players[player_turn]["train"].unmark()
                     break
 
 
