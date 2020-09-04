@@ -174,6 +174,15 @@ class MexicanTrain:
             else:
                 print("The Mexican Train is: ", self.mexican_train)
 
+            # if someone else's train is marked, you can play on them
+            marked_trains = []
+            for p in self.players:
+                if p["train"] is None or p["player"] == current_player:
+                    continue
+                elif p["train"].is_marked:
+                    print(p["player"].name + "'s train is marked: ", p["train"])
+                    marked_trains.append(p["train"])
+
             # let the player play on their own train a maximum of once
             while True:
                 # if the player doesn't want to (or can't) play any more, let them end their turn
@@ -189,12 +198,15 @@ class MexicanTrain:
                         self.players[player_turn]["train"].mark()
                     break
 
-                if True in [p["train"] is not None and p["train"].is_marked for p in self.players]:
-                    print("Someone is marked")
-
-                ans = input("Would you like to play on your own train (o) or the Mexican Train (M)? (o/M)")
-                while ans not in ["o", "M"]:
-                    ans = input("Please choose o or M")
+                ans = ""
+                if len(marked_trains) == 0:
+                    ans = input("Would you like to play on your own train (o) or the Mexican Train (M)? (o/M)")
+                    while ans not in ["o", "M"]:
+                        ans = input("Please choose o or M")
+                else:
+                    ans = input("Would you like to play on your own train (o), someone else's train (s), or the Mexican Train (M)? (o/s/M)")
+                    while ans not in ["o", "M", "s"]:
+                        ans = input("Please choose o, s, or M")
 
                 # if the player wants to play on the Mexican Train
                 if ans == "M":
@@ -219,7 +231,7 @@ class MexicanTrain:
                     break
 
                 # else the player wants to play on their own train
-                else:
+                elif ans == "o":
                     # let the player choose a domino to play
                     attempted_play = current_player.play_domino()
                     if self.players[player_turn]["train"] is None:
@@ -242,6 +254,28 @@ class MexicanTrain:
                     # if the player's train is marked and they play, unmark it
                     self.players[player_turn]["train"].unmark()
                     break
+                elif ans == "s":
+                    i = 1
+                    for train in marked_trains:
+                        print(i, ": ", train)
+                        i += 1
+                    t_index = int(input("Which train would you like to play on? ")) - 1
+                    while not (0 <= t_index < i):
+                        t_index = int(input("Please choose a domino between 1 and " + str(i) + ": ")) - 1
+
+                    attempted_play = current_player.play_domino()
+
+                    if not marked_trains[t_index].add_domino(attempted_play):
+                        print("That domino can't play. Try again.")
+                        current_player.add_domino(attempted_play)
+                        continue
+
+                    print("Domino added")
+                    print("The new train: ", marked_trains[t_index])
+                    break
+                else:
+                    print("invalid turn answer given")
+                    raise ValueError
 
 
 
