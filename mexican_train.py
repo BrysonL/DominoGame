@@ -136,29 +136,22 @@ class MexicanTrain:
             # let the player play on their own train until they can't play any more
             while True:
                 # if the player doesn't want to (or can't) play any more, let them end their turn
-                ans = input("Would you like to play a domino? (y/N)")
-                while ans not in ["y", "N"]:
-                    ans = input("Please choose y or N")
-
-                if ans == "N":
+                attempted_play = current_player.play_on_train(train=self.players[player_turn]["train"],
+                                                              center_domino=self.center_domino)
+                if attempted_play is None:
+                    print("Turn ended")
                     break
 
-                # let the player choose a domino to play
-                attempted_play = current_player.play_domino()
                 if self.players[player_turn]["train"] is None:
                     if attempted_play.match(self.center_domino):
                         if attempted_play.num2 == self.center_domino.num1:
                             attempted_play.flip()
-                        self.players[player_turn]["train"] = DominoTrain(attempted_play)
-                    else:
-                        print("That domino can't play. Try again.")
+                        else:
+                            print("That domino can't play")
+                            current_player.add_domino(attempted_play)
+                    elif not self.players[player_turn]["train"].add_domino(attempted_play):
+                        print("That domino can't play")
                         current_player.add_domino(attempted_play)
-                        continue
-                elif not self.players[player_turn]["train"].add_domino(attempted_play):
-                    print("That domino can't play. Try again.")
-                    current_player.add_domino(attempted_play)
-                    continue
-
                 print("Domino added")
                 print("Your new train: ", self.players[player_turn]["train"])
 

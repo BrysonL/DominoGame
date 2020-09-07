@@ -1,5 +1,5 @@
 from domino import Domino
-
+from domino_train import DominoTrain
 
 class DominoPlayer:
 
@@ -59,3 +59,32 @@ class DominoPlayer:
 
         # if they wanted to play that domino, take it out of their hand and add it to the train
         return self.hand.pop(d_index)
+
+    def play_on_train(self, train=None, center_domino=None):
+        if train is not None and not isinstance(train, DominoTrain):
+            raise TypeError
+        if center_domino is not None and not isinstance(center_domino, Domino):
+            raise TypeError
+
+        # let the player choose a domino to play
+        while True:
+            ans = input("Would you like to play a domino? (y/N)")
+            while ans not in ["y", "N"]:
+                ans = input("Please choose y or N")
+
+            if ans == "N":
+                return None
+
+            attempted_play = self.play_domino()
+            if train is None:
+                if attempted_play.match(center_domino):
+                    return attempted_play
+                else:
+                    print("That domino can't play. Try again.")
+                    self.add_domino(attempted_play)
+
+            elif train.can_add_domino(attempted_play):
+                return attempted_play
+            else:
+                print("That domino can't play. Try again.")
+                self.add_domino(attempted_play)
