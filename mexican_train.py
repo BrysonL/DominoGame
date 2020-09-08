@@ -1,7 +1,7 @@
 from domino import Domino
 from domino_player import DominoPlayer
 from domino_train import DominoTrain
-from random import(randint)
+from random import randint
 
 
 class MexicanTrain:
@@ -146,17 +146,19 @@ class MexicanTrain:
                     if attempted_play.match(self.center_domino):
                         if attempted_play.num2 == self.center_domino.num1:
                             attempted_play.flip()
-                        else:
-                            print("That domino can't play")
-                            current_player.add_domino(attempted_play)
-                    elif not self.players[player_turn]["train"].add_domino(attempted_play):
+                        self.players[player_turn]["train"] = DominoTrain(attempted_play)
+                    else:
                         print("That domino can't play")
                         current_player.add_domino(attempted_play)
+                elif not self.players[player_turn]["train"].add_domino(attempted_play):
+                    print("That domino can't play")
+                    current_player.add_domino(attempted_play)
                 print("Domino added")
                 print("Your new train: ", self.players[player_turn]["train"])
 
         while 0 not in [len(p["player"].hand) for p in self.players]:
             # the next player gets to play, and reset the count at the last player
+            playable_trains = []
             player_turn += 1
             player_turn %= len(player_list)
             current_player = self.players[player_turn]["player"]
@@ -166,6 +168,15 @@ class MexicanTrain:
                 print("The Mexican Train hasn't started yet")
             else:
                 print("The Mexican Train is: ", self.mexican_train)
+            playable_trains.append({
+                "name": "__self",
+                "train": self.players[player_turn]["train"]
+            })
+
+            playable_trains.append({
+                "name": "__mexican_train",
+                "train": self.mexican_train
+            })
 
             # if someone else's train is marked, you can play on them
             marked_trains = []
@@ -175,6 +186,10 @@ class MexicanTrain:
                 elif p["train"].is_marked:
                     print(p["player"].name + "'s train is marked: ", p["train"])
                     marked_trains.append(p["train"])
+                    playable_trains.append({
+                        "name": p["player"].name,
+                        "train": p["train"]
+                    })
 
             # let the player play on their own train a maximum of once
             while True:

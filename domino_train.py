@@ -1,5 +1,4 @@
 from domino import Domino
-from domino_player import DominoPlayer
 
 class DominoTrain:
 
@@ -59,9 +58,3 @@ class DominoTrain:
 
         return False
 
-    # a player can play on a train if any of their dominoes can play
-    def player_can_play(self, player):
-        if not isinstance(player, DominoPlayer):
-            return TypeError
-
-        return True in [self.can_add_domino(d) for d in player.hand]
