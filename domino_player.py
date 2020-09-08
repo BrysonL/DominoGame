@@ -74,17 +74,27 @@ class DominoPlayer:
 
             if ans == "N":
                 return None
-
-            attempted_play = self.play_domino()
-            if train is None:
-                if attempted_play.match(center_domino):
+            else:
+                attempted_play = self.execute_play(train=train, center_domino=center_domino)
+                if attempted_play is not None:
                     return attempted_play
-                else:
-                    print("That domino can't play. Try again.")
-                    self.add_domino(attempted_play)
 
-            elif train.can_add_domino(attempted_play):
+    def execute_play(self, train, center_domino):
+        if train is not None and not isinstance(train, DominoTrain):
+            raise TypeError
+        if center_domino is not None and not isinstance(center_domino, Domino):
+            raise TypeError
+
+        attempted_play = self.play_domino()
+        if train is None:
+            if attempted_play.match(center_domino):
                 return attempted_play
             else:
                 print("That domino can't play. Try again.")
                 self.add_domino(attempted_play)
+
+        elif train.can_add_domino(attempted_play):
+            return attempted_play
+        else:
+            print("That domino can't play. Try again.")
+            self.add_domino(attempted_play)
