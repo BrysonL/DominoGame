@@ -185,116 +185,38 @@ class MexicanTrain:
 
             # let the player play on their own train a maximum of once
             while True:
-                attempted_play = current_player.play_on_trains(trains=playable_trains,
-                                                              center_domino=self.center_domino)
-                if attempted_play is None:
-                    print("Turn ended")
-                    break
-
-                if self.players[player_turn]["train"] is None:
-                    if attempted_play.match(self.center_domino):
-                        if attempted_play.num2 == self.center_domino.num1:
-                            attempted_play.flip()
-                        self.players[player_turn]["train"] = DominoTrain(attempted_play)
-                    else:
-                        print("That domino can't play")
-                        current_player.add_domino(attempted_play)
-                elif not self.players[player_turn]["train"].add_domino(attempted_play):
-                    print("That domino can't play")
-                    current_player.add_domino(attempted_play)
-                print("Domino added")
-                print("Your new train: ", self.players[player_turn]["train"])
-                # if the player doesn't want to (or can't) play any more, let them end their turn
-                ans = input("Would you like to play a domino? (y/N)")
-                while ans not in ["y", "N"]:
-                    ans = input("Please choose y or N")
-
-                # if the player doesn't play, draw and end turn
-                if ans == "N":
+                play_dict = current_player.play_on_trains(trains=playable_trains,
+                                                               center_domino=self.center_domino)
+                if play_dict is None:
+                    print("Turn skipped, drawing domino and marking train")
                     self.draw_domino(current_player)
                     # if the player can't play on their train, mark it
                     if self.players[player_turn]["train"] is not None:
                         self.players[player_turn]["train"].mark()
                     break
 
-                ans = ""
-                if len(marked_trains) == 0:
-                    ans = input("Would you like to play on your own train (o) or the Mexican Train (M)? (o/M)")
-                    while ans not in ["o", "M"]:
-                        ans = input("Please choose o or M")
-                else:
-                    ans = input("Would you like to play on your own train (o), someone else's train (s), or the Mexican Train (M)? (o/s/M)")
-                    while ans not in ["o", "M", "s"]:
-                        ans = input("Please choose o, s, or M")
+                train_to_play = playable_trains[play_dict["train_key"]]
+                attempted_play = play_dict["domino"]
 
-                # if the player wants to play on the Mexican Train
-                if ans == "M":
-                    # let the player choose a domino to play
-                    attempted_play = current_player.play_domino()
-                    if self.mexican_train is None:
-                        if attempted_play.match(self.center_domino):
-                            if attempted_play.num2 == self.center_domino.num1:
-                                attempted_play.flip()
-                            self.mexican_train = DominoTrain(attempted_play)
-                        else:
-                            print("That domino can't play. Try again.")
-                            current_player.add_domino(attempted_play)
-                            continue
-                    elif not self.mexican_train.add_domino(attempted_play):
-                        print("That domino can't play. Try again.")
-                        current_player.add_domino(attempted_play)
-                        continue
-
-                    print("Domino added")
-                    print("The new Mexican Train: ", self.mexican_train)
-                    break
-
-                # else the player wants to play on their own train
-                elif ans == "o":
-                    # let the player choose a domino to play
-                    attempted_play = current_player.play_domino()
-                    if self.players[player_turn]["train"] is None:
-                        if attempted_play.match(self.center_domino):
-                            if attempted_play.num2 == self.center_domino.num1:
-                                attempted_play.flip()
+                if train_to_play is None:
+                    if attempted_play.match(self.center_domino):
+                        if attempted_play.num2 == self.center_domino.num1:
+                            attempted_play.flip()
+                        if play_dict["train_key"] == "__self":
                             self.players[player_turn]["train"] = DominoTrain(attempted_play)
-                        else:
-                            print("That domino can't play. Try again.")
-                            current_player.add_domino(attempted_play)
-                            continue
+                        elif play_dict["train_key"] == "__mexican_train":
+                            self.mexican_train = DominoTrain(attempted_play)
+                        break
                     else:
-                        if not self.players[player_turn]["train"].add_domino(attempted_play):
-                            print("That domino can't play. Try again.")
-                            current_player.add_domino(attempted_play)
-                            continue
-
-                    print("Domino added")
-                    print("Your new train: ", self.players[player_turn]["train"])
-                    # if the player's train is marked and they play, unmark it
-                    self.players[player_turn]["train"].unmark()
-                    break
-                elif ans == "s":
-                    i = 1
-                    for train in marked_trains:
-                        print(i, ": ", train)
-                        i += 1
-                    t_index = int(input("Which train would you like to play on? ")) - 1
-                    while not (0 <= t_index < i):
-                        t_index = int(input("Please choose a domino between 1 and " + str(i) + ": ")) - 1
-
-                    attempted_play = current_player.play_domino()
-
-                    if not marked_trains[t_index].add_domino(attempted_play):
-                        print("That domino can't play. Try again.")
+                        print("That domino can't play")
                         current_player.add_domino(attempted_play)
-                        continue
+                elif not train_to_play.add_domino(attempted_play):
+                    print("That domino can't play")
+                    current_player.add_domino(attempted_play)
+                    continue
 
-                    print("Domino added")
-                    print("The new train: ", marked_trains[t_index])
-                    break
-                else:
-                    print("invalid turn answer given")
-                    raise ValueError
+                print("Play successful. New train:", train_to_play)
+                break
 
 
 

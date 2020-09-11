@@ -104,6 +104,8 @@ class DominoPlayer:
             input_dict[i] = key
             i += 1
 
+        i -= 1
+
         while True:
             ans = input("Would you like to play a domino? (y/N)")
             while ans not in ["y", "N"]:
@@ -120,7 +122,7 @@ class DominoPlayer:
                 attempted_play = self.execute_play(train=trains[input_dict[int(train_choice)]],
                                                    center_domino=center_domino)
                 if attempted_play is not None:
-                    return input_dict[int(train_choice)], attempted_play
+                    return {"train_key": input_dict[int(train_choice)], "domino": attempted_play}
 
 
 
