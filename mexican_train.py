@@ -158,7 +158,7 @@ class MexicanTrain:
 
         while 0 not in [len(p["player"].hand) for p in self.players]:
             # the next player gets to play, and reset the count at the last player
-            playable_trains = []
+            playable_trains = {}
             player_turn += 1
             player_turn %= len(player_list)
             current_player = self.players[player_turn]["player"]
@@ -168,15 +168,9 @@ class MexicanTrain:
                 print("The Mexican Train hasn't started yet")
             else:
                 print("The Mexican Train is: ", self.mexican_train)
-            playable_trains.append({
-                "name": "__self",
-                "train": self.players[player_turn]["train"]
-            })
+            playable_trains["__self"] = self.players[player_turn]["train"]
 
-            playable_trains.append({
-                "name": "__mexican_train",
-                "train": self.mexican_train
-            })
+            playable_trains["__mexican_train"] = self.mexican_train
 
             # if someone else's train is marked, you can play on them
             marked_trains = []
@@ -186,13 +180,30 @@ class MexicanTrain:
                 elif p["train"].is_marked:
                     print(p["player"].name + "'s train is marked: ", p["train"])
                     marked_trains.append(p["train"])
-                    playable_trains.append({
-                        "name": p["player"].name,
-                        "train": p["train"]
-                    })
+                    # note this implementation will have problems if a player's name is __self or __mexican_train
+                    playable_trains[p["player"].name] = p["train"]
 
             # let the player play on their own train a maximum of once
             while True:
+                attempted_play = current_player.play_on_trains(trains=playable_trains,
+                                                              center_domino=self.center_domino)
+                if attempted_play is None:
+                    print("Turn ended")
+                    break
+
+                if self.players[player_turn]["train"] is None:
+                    if attempted_play.match(self.center_domino):
+                        if attempted_play.num2 == self.center_domino.num1:
+                            attempted_play.flip()
+                        self.players[player_turn]["train"] = DominoTrain(attempted_play)
+                    else:
+                        print("That domino can't play")
+                        current_player.add_domino(attempted_play)
+                elif not self.players[player_turn]["train"].add_domino(attempted_play):
+                    print("That domino can't play")
+                    current_player.add_domino(attempted_play)
+                print("Domino added")
+                print("Your new train: ", self.players[player_turn]["train"])
                 # if the player doesn't want to (or can't) play any more, let them end their turn
                 ans = input("Would you like to play a domino? (y/N)")
                 while ans not in ["y", "N"]:
