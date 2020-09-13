@@ -143,6 +143,7 @@ class MexicanTrain:
                     print("Turn ended")
                     break
 
+                # if the player's train hasn't started yet, their play should start their train
                 if self.players[player_turn]["train"] is None:
                     if attempted_play.match(self.center_domino):
                         if attempted_play.num2 == self.center_domino.num1:
@@ -152,6 +153,7 @@ class MexicanTrain:
                         print("That domino can't play")
                         current_player.add_domino(attempted_play)
                         continue
+                # if the player's train has already started, their play should add to their train
                 elif not self.players[player_turn]["train"].add_domino(attempted_play):
                     print("That domino can't play")
                     current_player.add_domino(attempted_play)
@@ -159,22 +161,30 @@ class MexicanTrain:
                 print("Domino added")
                 print("Your new train: ", self.players[player_turn]["train"])
 
-        total_turns = 0
+        # track some stats about the match
+        total_turns = len(self.players)
         passes = 0
         plays = 0
         last_play_turn = 0
         draw = False
 
+        # the game continues until someone uses all their dominoes
         while 0 not in [len(p["player"].hand) for p in self.players]:
-            # the next player gets to play, and reset the count at the last player
+            # track which trains the player can play on
             playable_trains = {}
+            # the next player gets to play, and reset the count at the last player
             player_turn += 1
             player_turn %= len(player_list)
             total_turns += 1
+
+            # if the game goes on too long, it's a draw
+            # (there are better ways to determine this, but I 80/20'd it
             if total_turns > 1000:
                 print("too many turns, assuming a draw")
                 draw = True
                 break
+
+            # display the current trains
             current_player = self.players[player_turn]["player"]
             print(current_player.name + "'s turn")
             print("Your train: ", self.players[player_turn]["train"])
@@ -197,22 +207,26 @@ class MexicanTrain:
                     # note this implementation will have problems if a player's name is __self or __mexican_train
                     playable_trains[p["player"].name] = p["train"]
 
-            # let the player play on their own train a maximum of once
+            # let the player play a maximum of once
             while True:
+                # since there are multiple trains the player could play on, we need to know the train and the domino
+                # they select
                 play_dict = current_player.play_on_trains(trains=playable_trains,
                                                           center_domino=self.center_domino)
                 if play_dict is None:
                     print("Turn skipped, drawing domino and marking train")
                     self.draw_domino(current_player)
-                    # if the player can't play on their train, mark it
+                    # if the player decides not to play, mark their train
                     if self.players[player_turn]["train"] is not None:
                         self.players[player_turn]["train"].mark()
                     passes += 1
                     break
 
+                # store the train they want to play on and the domino they want to play for easy access
                 train_to_play = playable_trains[play_dict["train_key"]]
                 attempted_play = play_dict["domino"]
 
+                # if the train hasn't started yet, start it
                 if train_to_play is None:
                     if attempted_play.match(self.center_domino):
                         if attempted_play.num2 == self.center_domino.num1:
@@ -225,6 +239,7 @@ class MexicanTrain:
                     else:
                         print("That domino can't play")
                         current_player.add_domino(attempted_play)
+                # if their domino can play on the existing train, play it
                 elif not train_to_play.add_domino(attempted_play):
                     print("That domino can't play")
                     current_player.add_domino(attempted_play)
@@ -238,18 +253,24 @@ class MexicanTrain:
 
                 break
 
+        # if the game ended in a draw, print that
         if draw:
             print("The match was a draw")
-            print("The last play was on turn: ", last_play_turn)
+
         # print the hand of each player
         for p in self.players:
             if len(p['player'].hand) == 0:
                 print(p["player"].name, "wins!")
             else:
                 print(p["player"].name, "'s hand", ' '.join(str(d) for d in p["player"].hand))
-        print("Total turns: ", total_turns)
+
+        # we'll say the game "ended" when the last play was made
+        # this is the same as the total_turns unless it was a draw
+        print("Total turns: ", last_play_turn)
+        print("Total times around: ", round(last_play_turn / len(self.players)))
         print("Plays: ", plays)
         print("Passes: ", passes)
+
 
 game = MexicanTrain()
 

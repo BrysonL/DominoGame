@@ -60,6 +60,7 @@ class DominoPlayer:
         # if they wanted to play that domino, take it out of their hand and add it to the train
         return self.hand.pop(d_index)
 
+    # figure out which domino the player would like to play on a train and return it
     def play_on_train(self, train=None, center_domino=None):
         if train is not None and not isinstance(train, DominoTrain):
             raise TypeError
@@ -68,12 +69,13 @@ class DominoPlayer:
         if train is None and center_domino is None:
             raise ValueError
 
-        # let the player choose a domino to play
+        # let the player choose if they'd like to play
         while True:
             ans = input("Would you like to play a domino? (y/N)")
             while ans not in ["y", "N"]:
                 ans = input("Please choose y or N")
 
+            # if they don't want to play, return None, else return their play
             if ans == "N":
                 return None
             else:
@@ -82,19 +84,24 @@ class DominoPlayer:
                     return attempted_play
                 print("That domino can't play, try again.")
 
+    # figure out which (train, domino) pair the player would like to play on a train and return it
     def play_on_trains(self, trains, center_domino=None):
         if trains is not None and not isinstance(trains, dict):
             raise TypeError
         if center_domino is not None and not isinstance(center_domino, Domino):
             raise TypeError
 
+        # show the player their hand and ask which train they'd like to play on
         print("Your hand:", ' '.join(str(d) for d in self.hand))
         print("Which train would you like to play on?")
-        i = 1
+        i = 0
+
+        # track which input corresponds to each key in the train dictionary
         input_dict = {}
         for key in trains:
             if trains[key] is not None and not isinstance(trains[key], DominoTrain):
                 raise TypeError
+            i += 1
 
             if key == "__self":
                 print("[", i, "] Your train: ", trains[key])
@@ -106,10 +113,8 @@ class DominoPlayer:
                 print("[", i, "] ", key, "'s train: ", trains[key])
 
             input_dict[i] = key
-            i += 1
 
-        i -= 1
-
+        # let the player choose which train they'd like to play on
         while True:
             ans = input("Would you like to play a domino? (y/N)")
             while ans not in ["y", "N"]:
@@ -117,36 +122,43 @@ class DominoPlayer:
 
             if ans == "N":
                 return None
+            # let the player choose which train to play on
             else:
                 train_choice = input("Choose which train you'd like to play on by entering a number between 1 and "
                                      + str(i) + ": ")
                 while not 0 < int(train_choice) <= i:
                     train_choice = input("Choose a number between 1 and " + str(i) + ": ")
 
+                # once they choose a train, let them play a domino
                 attempted_play = self.execute_play(train=trains[input_dict[int(train_choice)]],
                                                    center_domino=center_domino)
                 if attempted_play is not None:
                     return {"train_key": input_dict[int(train_choice)], "domino": attempted_play}
 
-
-
-
+    # generic method to play a domino
     def execute_play(self, train, center_domino):
         if train is not None and not isinstance(train, DominoTrain):
             raise TypeError
         if center_domino is not None and not isinstance(center_domino, Domino):
             raise TypeError
 
+        # choose which domino to play
         attempted_play = self.play_domino()
+
+        # if they don't choose a domino, return None
         if attempted_play is None:
             return None
+
+        # make sure the domino matches before adding it
         if train is None:
             if attempted_play.match(center_domino):
                 return attempted_play
             else:
+                print("That domino can't play")
                 self.add_domino(attempted_play)
 
         elif train.can_add_domino(attempted_play):
             return attempted_play
         else:
+            print("That domino can't play")
             self.add_domino(attempted_play)
