@@ -78,6 +78,7 @@ class DominoPlayer:
                 attempted_play = self.execute_play(train=train, center_domino=center_domino)
                 if attempted_play is not None:
                     return attempted_play
+                print("That domino can't play, try again.")
 
     def play_on_trains(self, trains, center_domino=None):
         if trains is not None and not isinstance(trains, dict):
@@ -140,11 +141,9 @@ class DominoPlayer:
             if attempted_play.match(center_domino):
                 return attempted_play
             else:
-                print("That domino can't play. Try again.")
                 self.add_domino(attempted_play)
 
         elif train.can_add_domino(attempted_play):
             return attempted_play
         else:
-            print("That domino can't play. Try again.")
             self.add_domino(attempted_play)
