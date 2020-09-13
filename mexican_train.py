@@ -151,17 +151,30 @@ class MexicanTrain:
                     else:
                         print("That domino can't play")
                         current_player.add_domino(attempted_play)
+                        continue
                 elif not self.players[player_turn]["train"].add_domino(attempted_play):
                     print("That domino can't play")
                     current_player.add_domino(attempted_play)
+                    continue
                 print("Domino added")
                 print("Your new train: ", self.players[player_turn]["train"])
+
+        total_turns = 0
+        passes = 0
+        plays = 0
+        last_play_turn = 0
+        draw = False
 
         while 0 not in [len(p["player"].hand) for p in self.players]:
             # the next player gets to play, and reset the count at the last player
             playable_trains = {}
             player_turn += 1
             player_turn %= len(player_list)
+            total_turns += 1
+            if total_turns > 1000:
+                print("too many turns, assuming a draw")
+                draw = True
+                break
             current_player = self.players[player_turn]["player"]
             print(current_player.name + "'s turn")
             print("Your train: ", self.players[player_turn]["train"])
@@ -194,6 +207,7 @@ class MexicanTrain:
                     # if the player can't play on their train, mark it
                     if self.players[player_turn]["train"] is not None:
                         self.players[player_turn]["train"].mark()
+                    passes += 1
                     break
 
                 train_to_play = playable_trains[play_dict["train_key"]]
@@ -217,17 +231,29 @@ class MexicanTrain:
                     continue
 
                 print("Play successful. New train:", train_to_play)
+                plays += 1
+                last_play_turn = total_turns
+                if play_dict["train_key"] == "__self":
+                    self.players[player_turn]["train"].unmark()
+
                 break
 
+        if draw:
+            print("The match was a draw")
+            print("The last play was on turn: ", last_play_turn)
         # print the hand of each player
         for p in self.players:
-            player = p["player"]
-            print(' '.join(str(d) for d in player.hand))
-
+            if len(p['player'].hand) == 0:
+                print(p["player"].name, "wins!")
+            else:
+                print(p["player"].name, "'s hand", ' '.join(str(d) for d in p["player"].hand))
+        print("Total turns: ", total_turns)
+        print("Plays: ", plays)
+        print("Passes: ", passes)
 
 game = MexicanTrain()
 
-p1 = DominoPlayer("p1")
+p1 = DominoPlayerCPU("p1")
 p2 = DominoPlayerCPU("p2")
 
 game.play_game([p1, p2])

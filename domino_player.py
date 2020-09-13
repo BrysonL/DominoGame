@@ -65,6 +65,8 @@ class DominoPlayer:
             raise TypeError
         if center_domino is not None and not isinstance(center_domino, Domino):
             raise TypeError
+        if train is None and center_domino is None:
+            raise ValueError
 
         # let the player choose a domino to play
         while True:
@@ -86,6 +88,7 @@ class DominoPlayer:
         if center_domino is not None and not isinstance(center_domino, Domino):
             raise TypeError
 
+        print("Your hand:", ' '.join(str(d) for d in self.hand))
         print("Which train would you like to play on?")
         i = 1
         input_dict = {}
