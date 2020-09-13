@@ -1,6 +1,7 @@
 from domino import Domino
 from domino_player import DominoPlayer
 from domino_train import DominoTrain
+from domino_player_cpu import DominoPlayerCPU
 from random import randint
 
 
@@ -186,7 +187,7 @@ class MexicanTrain:
             # let the player play on their own train a maximum of once
             while True:
                 play_dict = current_player.play_on_trains(trains=playable_trains,
-                                                               center_domino=self.center_domino)
+                                                          center_domino=self.center_domino)
                 if play_dict is None:
                     print("Turn skipped, drawing domino and marking train")
                     self.draw_domino(current_player)
@@ -218,18 +219,15 @@ class MexicanTrain:
                 print("Play successful. New train:", train_to_play)
                 break
 
-
-
         # print the hand of each player
         for p in self.players:
             player = p["player"]
             print(' '.join(str(d) for d in player.hand))
 
 
-
 game = MexicanTrain()
 
 p1 = DominoPlayer("p1")
-p2 = DominoPlayer("p2")
+p2 = DominoPlayerCPU("p2")
 
-game.play_game([p1,p2])
+game.play_game([p1, p2])
